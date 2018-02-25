@@ -1,0 +1,47 @@
+{
+	"name": "@daas/core",
+	"version": "0.0.1-dev.3",
+	"description": "The core of DaaS, which controls a single bot and manages a single lobby",
+	"main": "build/src/index.js",
+	"scripts": {
+		"test:integration": "mocha --bail -r source-map-support/register build/test/index.js --timeout 90000 --slow 40000 --exit",
+		"test": "npm run test:integration",
+		"build": "tsc",
+		"prepack": "npm run build",
+		"start": "node -r source-map-support/register build/src/index.js",
+		"reformat": "prettier --write \"**/*.ts\""
+	},
+	"author": "Pablo Rodríguez <pabloviolin8@gmail.com>",
+	"license": "MIT",
+	"dependencies": {
+		"@daas/communications": "0.0.1-dev.4",
+		"@daas/db-adapter": "0.0.1-dev.3",
+		"@daas/model": "0.0.1-dev.1",
+		"dota2": "^6.0.1",
+		"rxjs": "^5.5.5",
+		"steam": "^1.4.0"
+	},
+	"devDependencies": {
+		"@types/chai": "^4.0.10",
+		"@types/dotenv": "^4.0.2",
+		"@types/mocha": "^2.2.45",
+		"@types/node": "^8.5.2",
+		"chai": "^4.1.2",
+		"dotenv": "^4.0.0",
+		"mocha": "^4.0.1",
+		"prettier": "^1.9.2",
+		"source-map-support": "^0.5.0",
+		"typescript": "^2.6.2"
+	},
+	"directories": {
+		"test": "test"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/midasclub/daas-core.git"
+	},
+	"bugs": {
+		"url": "https://github.com/midasclub/daas-core/issues"
+	},
+	"homepage": "https://github.com/midasclub/daas-core#readme"
+}
