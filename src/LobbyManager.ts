@@ -69,13 +69,15 @@ export class LobbyManager {
 		this.lobby = lobby
 	}
 
-	public waitUntilResultOrCancellation() {
+	public waitUntilResultOrCancellation(): Promise<LobbyStatus> {
 		return Promise.race([
 			this.matchOutcomeUpdates
 				.take(1)
+				.map(() => LobbyStatus.CLOSED)
 				.toPromise(),
 			this.lobbyTimeoutStream
 				.take(1)
+				.map(() => LobbyStatus.CANCELLED)
 				.toPromise()
 		])
 	}

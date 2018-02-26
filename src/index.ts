@@ -86,7 +86,8 @@ async function init(comms: Communications) {
 		"index/matchStartListener"
 	)
 
-	await manager.waitUntilResultOrCancellation()
+	const finalStatus = await manager.waitUntilResultOrCancellation()
+	await Lobbies.update(lobby, { status: finalStatus })
 
 	console.log("My work here is done. Waiting 5 seconds then shutting down...")
 	await wait(5000)
