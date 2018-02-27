@@ -1,6 +1,6 @@
 {
 	"name": "@daas/core",
-	"version": "0.0.1-dev.5",
+	"version": "0.0.1-dev.6",
 	"description": "The core of DaaS, which controls a single bot and manages a single lobby",
 	"main": "build/src/index.js",
 	"scripts": {

@@ -1,5 +1,5 @@
 import { Bots, Lobbies } from "@daas/db-adapter"
-import { Bot, BotStatus } from "@daas/model"
+import { Bot, BotStatus, LobbyStatus } from "@daas/model"
 import { Communications, MessageType } from "@daas/communications"
 import { Observable } from "rxjs"
 import { getDotaClient } from "./getDotaClient"
@@ -89,7 +89,7 @@ async function init(comms: Communications) {
 	const finalStatus = await manager.waitUntilResultOrCancellation()
 	await Lobbies.update(lobby, { status: finalStatus })
 
-	console.log("My work here is done. Waiting 5 seconds then shutting down...")
+	console.log(`The final lobby status is ${LobbyStatus[finalStatus]}`)
 	await wait(5000)
 
 	await gracefulShutdown(comms, bot, manager)
@@ -142,5 +142,3 @@ async function main() {
 }
 
 main().catch(console.error)
-
-// TODO LobbyStatus closed

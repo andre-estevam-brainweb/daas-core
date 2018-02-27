@@ -59,8 +59,6 @@ export class LobbyManager {
 			.take(1)
 			.flatMap(() => Observable.fromPromise(Config.get()))
 			.flatMap(it => Observable.fromPromise(wait(it.lobbyTimeout * 1000)))
-			// Only send the timeout if the lobby hasn't started
-			.filter(() => this.lobby.matchId === null)
 	}
 
 	constructor(comms: Communications, dota: any, lobby: Lobby) {
@@ -69,16 +67,31 @@ export class LobbyManager {
 		this.lobby = lobby
 	}
 
+	/**
+	 * @returns A promise that resolves whenever the match is finished, or the
+	 * lobby is cancelled because not enough players joined. Resolves with
+	 * LobbyStatus.CLOSED if the match finished normally, otherwise resolves
+	 * with LobbyStatus.CANCELLED.
+	 */
 	public waitUntilResultOrCancellation(): Promise<LobbyStatus> {
 		return Promise.race([
 			this.matchOutcomeUpdates
 				.take(1)
-				.map(() => LobbyStatus.CLOSED)
-				.toPromise(),
+				.toPromise()
+				.then(() => LobbyStatus.CLOSED),
 			this.lobbyTimeoutStream
 				.take(1)
-				.map(() => LobbyStatus.CANCELLED)
 				.toPromise()
+				.then(() => {
+					// If we have a Match ID, the lobby already started,
+					// so we wait for it to finish.
+					if (this.lobby.matchId === null) {
+						return LobbyStatus.CANCELLED
+					} else {
+						// Never-resolving promise
+						return new Promise<LobbyStatus>(() => {})
+					}
+				})
 		])
 	}
 
@@ -322,6 +335,12 @@ export class LobbyManager {
 	private handleLobbyTimeout() {
 		errorHandler(
 			this.lobbyTimeoutStream.flatMap(() => {
+				if (this.lobby.matchId) {
+					// If we have a Match ID, the match was started,
+					// so we don't process the match cancelled logic.
+					return Observable.empty()
+				}
+
 				const notReadyPlayers = this.playersStatus
 					.filter(it => !it.isReady)
 					.map(it => it.steamId)
@@ -344,7 +363,7 @@ export class LobbyManager {
 						Lobbies.update(this.lobby, { status: LobbyStatus.CANCELLED }).then(
 							it => (this.lobby = it)
 						),
-						this.comms.sendMessage(MessageType.GAME_CANCELLED, notReadyPlayers)
+						this.comms.sendMessage(MessageType.GAME_CANCELLED, {notReadyPlayers})
 					])
 				)
 			}),
@@ -410,7 +429,7 @@ export class LobbyManager {
 					])
 				)
 			}),
-			"handleMatchIdReceived"
+			"handleGameResultReceived"
 		)
 	}
 
