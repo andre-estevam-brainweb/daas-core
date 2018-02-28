@@ -5,7 +5,7 @@ import { Observable } from "rxjs"
 import { getDotaClient } from "./getDotaClient"
 import { LobbyManager } from "./LobbyManager"
 import { errorHandler } from "./errorHandler"
-import { wait } from "../test/support/wait"
+import { wait } from "./support/wait"
 
 let manager: LobbyManager
 
@@ -48,9 +48,16 @@ async function init(comms: Communications) {
 				.catch(console.error)
 		})
 
-	const { info: { lobbyId } } = await comms.waitForMessage(
+	const response = await comms.waitForMessage(
 		MessageType.LOBBY_INFO
 	)
+
+	if (!response) {
+		return
+	}
+
+	const { info: { lobbyId } } = response
+
 	console.log(`The provider sent the lobby ID ${lobbyId}. Querying lobby...`)
 
 	const lobby =
@@ -133,6 +140,12 @@ async function main() {
 
 	try {
 		await init(comms)
+
+		// Cores shouldn't be alive for 3 hours. If any of them do, it's because
+		// they haven't been properly killed by the worker.
+		await wait(3 /*h*/ * 60 /*m*/ * 60 /*s*/ * 1000 /*ms*/)
+		// noinspection ExceptionCaughtLocallyJS
+		throw new Error("Alive for too long!")
 	} catch (e) {
 		console.error("An unexpected error occurred")
 		console.error(e)

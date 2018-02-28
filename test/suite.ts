@@ -8,7 +8,7 @@ import { Server, GameMode, Lobby, LobbyStatus } from "@daas/model"
 import { Bots, Lobbies } from "@daas/db-adapter"
 import { Communications, MessageType } from "@daas/communications"
 import { getDotaClient } from "../src/getDotaClient"
-import { wait } from "./support/wait"
+import { wait } from "../src/support/wait"
 import { LobbyMemberTeam } from "../src/enums/LobbyMemberTeam"
 import { PlayerStatus } from "../src/interfaces/PlayerStatus"
 

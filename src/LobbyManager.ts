@@ -11,7 +11,7 @@ import { PlayerStatus } from "./interfaces/PlayerStatus"
 import { errorHandler } from "./errorHandler"
 import { DOTA_GameState } from "./interfaces/DOTA_GameState"
 import { EMatchOutcome } from "./interfaces/EMatchOutcome"
-import { wait } from "../test/support/wait"
+import { wait } from "./support/wait"
 const { SeriesType, ServerRegion, schema: DotaSchema } = require("dota2")
 
 const GameVersion = DotaSchema.lookupEnum("DOTAGameVersion").values
