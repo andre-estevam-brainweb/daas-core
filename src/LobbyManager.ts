@@ -67,6 +67,10 @@ export class LobbyManager {
 		this.lobby = lobby
 	}
 
+	public invite(playerId: string) {
+		this.dota.inviteToLobby(playerId)
+	}
+
 	/**
 	 * @returns A promise that resolves whenever the match is finished, or the
 	 * lobby is cancelled because not enough players joined. Resolves with
@@ -268,7 +272,7 @@ export class LobbyManager {
 	}
 
 	private inviteAll() {
-		this.lobby.players.forEach(it => this.dota.inviteToLobby(it.steamId))
+		this.lobby.players.forEach(it => this.invite(it.steamId))
 	}
 
 	private launchLobby() {
@@ -363,7 +367,9 @@ export class LobbyManager {
 						Lobbies.update(this.lobby, { status: LobbyStatus.CANCELLED }).then(
 							it => (this.lobby = it)
 						),
-						this.comms.sendMessage(MessageType.GAME_CANCELLED, {notReadyPlayers})
+						this.comms.sendMessage(MessageType.GAME_CANCELLED, {
+							notReadyPlayers
+						})
 					])
 				)
 			}),

@@ -44,13 +44,10 @@ async function init(comms: Communications) {
 		.take(1)
 		.subscribe(() => {
 			console.log("The provider told me to kill myself. Let's do this.")
-			gracefulShutdown(comms, bot)
-				.catch(console.error)
+			gracefulShutdown(comms, bot).catch(console.error)
 		})
 
-	const response = await comms.waitForMessage(
-		MessageType.LOBBY_INFO
-	)
+	const response = await comms.waitForMessage(MessageType.LOBBY_INFO)
 
 	if (!response) {
 		return
@@ -72,6 +69,8 @@ async function init(comms: Communications) {
 	await Bots.update(bot, { status: BotStatus.IN_LOBBY })
 	await comms.sendMessage(MessageType.LOBBY_OK)
 
+	// Whenever a player status changes, save it to the database, and
+	// forward the changes to the worker.
 	errorHandler(
 		manager.playerStatusUpdates.flatMap(it =>
 			Observable.fromPromise(
@@ -86,11 +85,21 @@ async function init(comms: Communications) {
 		"index/playerStatusUpdates"
 	)
 
+	// Whenever a match starts, update the bot status.
 	errorHandler(
 		manager.matchIdStream.flatMap(() =>
 			Observable.fromPromise(Bots.update(bot, { status: BotStatus.IN_MATCH }))
 		),
 		"index/matchStartListener"
+	)
+
+	// Whenever the worker requests an invite resend, make the bot re-invite
+	errorHandler(
+		comms.adapterMessageStream
+			.filter(it => it.type === MessageType.RESEND_INVITE)
+			.map(it => it.info.playerSteamId as string)
+			.map(it => manager.invite(it)),
+		"index/resendInviteListener"
 	)
 
 	const finalStatus = await manager.waitUntilResultOrCancellation()
