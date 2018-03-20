@@ -1,6 +1,6 @@
 {
 	"name": "@daas/core",
-	"version": "0.0.1-dev.9",
+	"version": "0.0.1-dev.10",
 	"description": "The core of DaaS, which controls a single bot and manages a single lobby",
 	"main": "build/src/index.js",
 	"scripts": {
@@ -14,9 +14,9 @@
 	"author": "Pablo Rodríguez <pabloviolin8@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
-		"@daas/communications": "0.0.1-dev.6",
-		"@daas/db-adapter": "0.0.1-dev.15",
-		"@daas/model": "0.0.1-dev.5",
+		"@daas/communications": "0.0.1-dev.7",
+		"@daas/db-adapter": "0.0.1-dev.16",
+		"@daas/model": "0.0.1-dev.8",
 		"dota2": "^6.0.1",
 		"rxjs": "^5.5.6",
 		"steam": "^1.4.0"

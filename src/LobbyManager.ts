@@ -68,6 +68,7 @@ export class LobbyManager {
 	}
 
 	public invite(playerId: string) {
+		console.log(`Sent an invite to ${playerId} to lobby #${this.lobby.id}`)
 		this.dota.inviteToLobby(playerId)
 	}
 
