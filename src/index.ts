@@ -1,3 +1,7 @@
+import * as dotenv from "dotenv"
+
+dotenv.config()
+
 import { Bots, Lobbies } from "@daas/db-adapter"
 import { Bot, BotStatus, LobbyStatus } from "@daas/model"
 import { Communications, MessageType } from "@daas/communications"
@@ -104,6 +108,7 @@ async function init(comms: Communications) {
 
 	const finalStatus = await manager.waitUntilResultOrCancellation()
 	await Lobbies.update(lobby, { status: finalStatus })
+	await comms.sendMessage(MessageType.GAME_FINISHED)
 
 	console.log(`The final lobby status is ${LobbyStatus[finalStatus]}`)
 	await wait(5000)
