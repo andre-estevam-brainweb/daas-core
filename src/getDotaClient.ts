@@ -1,20 +1,29 @@
 import { Bot } from "@daas/model"
 const {
-	SteamClient,
-	SteamUser,
+	steam,
 	SteamFriends,
 	EResult,
 	EPersonaState
 } = require("steam")
+const fs = require('fs');
 const { Dota2Client } = require("dota2")
 
 export const getDotaClient = (bot: Bot) =>
 	new Promise<any>(async (resolve, reject) => {
 		try {
-			const steamClient = new SteamClient()
-			const steamUser = new SteamUser(steamClient)
+			
+			if (fs.existsSync('servers')) {
+				steam.servers = JSON.parse(fs.readFileSync('servers'));
+			}
+
+			const steamClient = new steam.SteamClient()
+			const steamUser = new steam.SteamUser(steamClient)
 			const steamFriends = new SteamFriends(steamClient)
 			const dota = new Dota2Client(steamClient, false, false)
+
+			steamClient.on('servers', (servers: any) => {
+				fs.writeFile('servers', JSON.stringify(servers));
+			});
 
 			steamClient.on("error", (err: any) => {
 				reject(err)
