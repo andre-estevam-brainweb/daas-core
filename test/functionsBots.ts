@@ -24,9 +24,8 @@ export default async () => {
 		it("Create Dota Client for bots", async () => {
 			bots = await Promise.all(
 				// Offset 1 because the first bot is the one creating the lobby
-				(await Bots.findAll(12, 1)).map(async it => {
+				(await Bots.findAll(10, 1)).map(async it => {
 					try {
-						console.log(it)
 						return await getDotaClient(it)
 					} catch (e) {
 						throw new Error(`Error on bot ${it.username} - ${e.message}`)

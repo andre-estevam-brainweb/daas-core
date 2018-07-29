@@ -1,6 +1,4 @@
 import "mocha"
-import { spawn } from "child_process"
-import { createWriteStream } from "fs"
 import { randomBytes } from "crypto"
 import { expect } from "chai"
 import { BehaviorSubject } from "rxjs"
@@ -34,15 +32,6 @@ export default async () => {
 			)
 
 			bots.forEach(it => expect(it.constructor.name).to.equal("Dota2Client"))
-		})
-
-		it("should be started successfully", () => {
-			const core = spawn("npm", ["start", "test"], { env: process.env })
-			core.stdout.pipe(createWriteStream("core.test.log"))
-			core.stderr.pipe(createWriteStream("core.test.error.log"))
-
-			process.on("SIGINT", () => core.kill())
-			process.on("SIGTERM", () => core.kill())
 		})
 
 		it("should open comms successfully", async () => {
