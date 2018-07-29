@@ -5,7 +5,7 @@
 	"main": "build/src/index.js",
 	"scripts": {
 		"test:integration": "mocha --bail -r source-map-support/register build/test/index.js --timeout 90000 --slow 40000 --exit",
-		"test": "npm run test:integration",
+		"test": "npm run build && npm run test:integration",
 		"build": "tsc",
 		"prepack": "npm run build",
 		"start": "node -r source-map-support/register build/src/index.js",

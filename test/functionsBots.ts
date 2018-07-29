@@ -12,7 +12,7 @@ import { wait } from "../src/support/wait"
 import { LobbyMemberTeam } from "../src/enums/LobbyMemberTeam"
 import { PlayerStatus } from "../src/interfaces/PlayerStatus"
 
-export const testSuite = async () => {
+export default async () => {
 	let comms: Communications
 	let lobby: Lobby
 	let bots: Array<any>
@@ -20,12 +20,13 @@ export const testSuite = async () => {
 	const getSteamID = (bot: any) => bot.ToSteamID(bot.AccountID).toString()
 	const invitedBots = () => bots.slice(0, 10)
 
-	describe("Initialization", () => {
-		it("should create a Dota client for each defined bot", async () => {
+	describe("Instance Bots", () => {
+		it("Create Dota Client for bots", async () => {
 			bots = await Promise.all(
 				// Offset 1 because the first bot is the one creating the lobby
-				(await Bots.findAll(undefined, 1)).map(async it => {
+				(await Bots.findAll(12, 1)).map(async it => {
 					try {
+						console.log(it)
 						return await getDotaClient(it)
 					} catch (e) {
 						throw new Error(`Error on bot ${it.username} - ${e.message}`)
@@ -35,7 +36,9 @@ export const testSuite = async () => {
 
 			bots.forEach(it => expect(it.constructor.name).to.equal("Dota2Client"))
 		})
+	})
 
+	describe("Write logs and test communications", () => {
 		it("should be started successfully", () => {
 			const core = spawn("npm", ["start", "test"], { env: process.env })
 			core.stdout.pipe(createWriteStream("core.test.log"))
@@ -45,17 +48,10 @@ export const testSuite = async () => {
 			process.on("SIGTERM", () => core.kill())
 		})
 
-		it("should open comms successfully", async () => {
+		it("should open communication and send messages", async () => {
 			comms = await Communications.open("test")
-		})
-
-		it("should send the boot OK message", async () => {
-			const msg = await comms.waitForMessage(MessageType.BOOT_OK, 3000)
-			console.log(msg.type)
-			expect(msg.type).to.equal(MessageType.BOOT_OK)
-		})
-
-		it("should send the dota OK message", async () => {
+			await comms.waitForMessage(MessageType.BOOT_OK, 3000)
+			
 			await comms.sendMessage(MessageType.DOTA_BOT_INFO, { botId: 1 })
 			await comms.waitForMessage(MessageType.DOTA_OK)
 		})
@@ -73,9 +69,9 @@ export const testSuite = async () => {
 			})
 
 			lobby = await Lobbies.insert({
-				name: `DaaS Test - ${randomBytes(2).toString("hex")}`,
-				server: Server.LUXEMBOURG,
-				gameMode: GameMode.ALL_DRAFT,
+				name: `DAAS Test - ${randomBytes(2).toString("hex")}`,
+				server: Server.BRAZIL,
+				gameMode: GameMode.ALL_PICK,
 				radiantHasFirstPick: true
 			})
 
@@ -120,6 +116,7 @@ export const testSuite = async () => {
 		) =>
 			new Promise<any>((resolve, reject) => {
 				try {
+					console.log(lobby.players)
 					const player = lobby.players.filter(
 						it => it.isRadiant === botTeamIsRadiant
 					)[nthPlayerInTeam]
@@ -260,6 +257,54 @@ export const testSuite = async () => {
 
 			const updatedLobby = (await Lobbies.findById(lobby.id))!
 			expect(updatedLobby.status).to.equal(LobbyStatus.IN_PROGRESS)
+		})
+	})
+
+	describe("Lobby Manager", () => {
+		it("Kick one player", async () => {
+			const players = invitedBots()
+			const playerKicked = players[players.length - 1]
+			console.log(playerKicked)
+			console.log(bots[0].Lobby.members)
+
+			await new Promise((resolve, reject) => {
+				playerKicked.leavePracticeLobby((err: any) => {
+						if (err) {
+							reject(err)
+						} else {
+							resolve()
+						}
+					}
+				)
+			})
+
+			await wait(10000)
+
+			expect(bots[0].Lobby.members).to.have.length(11)
+		})
+
+		it("Invite player again", async() => {
+			const newPlayerBot = bots[bots.length - 1]
+			
+			await new Promise((resolve, reject) => {
+				newPlayerBot.joinPracticeLobby(
+					bots[0].Lobby.lobby_id,
+					bots[0].Lobby.pass_key,
+					(err: any) => {
+						if (err) {
+							reject(err)
+						} else {
+							resolve()
+						}
+					}
+				)
+			})
+
+			// Wait a bit, so we know for sure that the bot has
+			// kicked the intruder
+			await wait(10000)
+
+			expect(bots[0].Lobby.members).to.have.length(10)
 		})
 	})
 
