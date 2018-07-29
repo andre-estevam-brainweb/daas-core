@@ -51,6 +51,7 @@ export const testSuite = async () => {
 
 		it("should send the boot OK message", async () => {
 			const msg = await comms.waitForMessage(MessageType.BOOT_OK, 3000)
+			console.log(msg.type)
 			expect(msg.type).to.equal(MessageType.BOOT_OK)
 		})
 

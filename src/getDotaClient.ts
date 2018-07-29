@@ -1,29 +1,17 @@
 import { Bot } from "@daas/model"
-const {
-	steam,
-	SteamFriends,
-	EResult,
-	EPersonaState
-} = require("steam")
-const fs = require('fs');
+const steam = require("steam")
 const { Dota2Client } = require("dota2")
+import getListOfServers from './getSteamServers';
 
 export const getDotaClient = (bot: Bot) =>
 	new Promise<any>(async (resolve, reject) => {
 		try {
-			
-			if (fs.existsSync('servers')) {
-				steam.servers = JSON.parse(fs.readFileSync('servers'));
-			}
+			steam.servers = await getListOfServers()
 
 			const steamClient = new steam.SteamClient()
 			const steamUser = new steam.SteamUser(steamClient)
-			const steamFriends = new SteamFriends(steamClient)
+			const steamFriends = new steam.SteamFriends(steamClient)
 			const dota = new Dota2Client(steamClient, false, false)
-
-			steamClient.on('servers', (servers: any) => {
-				fs.writeFile('servers', JSON.stringify(servers));
-			});
 
 			steamClient.on("error", (err: any) => {
 				reject(err)
@@ -41,8 +29,8 @@ export const getDotaClient = (bot: Bot) =>
 					}
 
 					steamClient.on("logOnResponse", async (response: any) => {
-						if (response.eresult === EResult.OK) {
-							steamFriends.setPersonaState(EPersonaState.Online)
+						if (response.eresult === steam.EResult.OK) {
+							steamFriends.setPersonaState(steam.EPersonaState.Online)
 							steamUser.gamesPlayed([
 								{
 									game_id: 570

@@ -11,7 +11,7 @@ import {
 import { Bots } from "@daas/db-adapter"
 import { testSuite } from "./suite"
 
-const MINIMUM_BOTS = 11
+const MINIMUM_BOTS = 5
 
 before(async () => {
 	process.env.NODE_ENV = "test"
@@ -20,15 +20,6 @@ before(async () => {
 			throw new Error(`The env var ${it} is not defined!`)
 		}
 	})
-
-	if (!process.env.DATABASE_URL!.includes("test")) {
-		throw new Error(
-			"The database name does not contain 'test'. The " +
-				"test suite is refusing to run just so you don't accidentally " +
-				"run this in the production database. " +
-				"Make sure to include 'test' in the name of your test database."
-		)
-	}
 
 	const bots = (() => {
 		try {
@@ -42,6 +33,7 @@ before(async () => {
 		throw new Error(`You need to define at least ${MINIMUM_BOTS} bots!`)
 	}
 
+  // await migrationsDown()
 	await migrationsUp()
 
 	await Promise.all(
