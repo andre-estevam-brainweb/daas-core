@@ -24,7 +24,7 @@ export default async () => {
 		it("should create a Dota client for each defined bot", async () => {
 			bots = await Promise.all(
 				// Offset 1 because the first bot is the one creating the lobby
-				(await Bots.findAll(1, 1)).map(async it => {
+				(await Bots.findAll(10, 1)).map(async it => {
 					try {
 						return await getDotaClient(it)
 					} catch (e) {
@@ -51,7 +51,6 @@ export default async () => {
 
 		it("should send the boot OK message", async () => {
 			const msg = await comms.waitForMessage(MessageType.BOOT_OK, 3000)
-			console.log(msg.type)
 			expect(msg.type).to.equal(MessageType.BOOT_OK)
 		})
 
@@ -74,7 +73,7 @@ export default async () => {
 
 			lobby = await Lobbies.insert({
 				name: `DaaS Test - ${randomBytes(2).toString("hex")}`,
-				server: Server.LUXEMBOURG,
+				server: Server.BRAZIL,
 				gameMode: GameMode.ALL_DRAFT,
 				radiantHasFirstPick: true
 			})
