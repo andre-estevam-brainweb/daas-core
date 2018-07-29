@@ -12,7 +12,7 @@ import { wait } from "../src/support/wait"
 import { LobbyMemberTeam } from "../src/enums/LobbyMemberTeam"
 import { PlayerStatus } from "../src/interfaces/PlayerStatus"
 
-export const testSuite = async () => {
+export default async () => {
 	let comms: Communications
 	let lobby: Lobby
 	let bots: Array<any>
@@ -24,7 +24,7 @@ export const testSuite = async () => {
 		it("should create a Dota client for each defined bot", async () => {
 			bots = await Promise.all(
 				// Offset 1 because the first bot is the one creating the lobby
-				(await Bots.findAll(undefined, 1)).map(async it => {
+				(await Bots.findAll(1, 1)).map(async it => {
 					try {
 						return await getDotaClient(it)
 					} catch (e) {
