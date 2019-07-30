@@ -9,6 +9,8 @@ import { getDotaClient } from "../src/getDotaClient"
 import { wait } from "../src/support/wait"
 import { LobbyMemberTeam } from "../src/enums/LobbyMemberTeam"
 import { PlayerStatus } from "../src/interfaces/PlayerStatus"
+import { spawn } from "child_process"
+import { createWriteStream } from "fs"
 
 export default async () => {
 	let comms: Communications
@@ -34,12 +36,23 @@ export default async () => {
 			bots.forEach(it => expect(it.constructor.name).to.equal("Dota2Client"))
 		})
 
+		it("should be started successfully", () => {
+			console.log('Starting bot')
+			const core = spawn("npm", ["start", "test"], { env: process.env })
+			core.stdout.pipe(createWriteStream("core.test.log"))
+			core.stderr.pipe(createWriteStream("core.test.error.log"))
+
+			process.on("SIGINT", () => core.kill())
+			process.on("SIGTERM", () => core.kill())
+		})
+
 		it("should open comms successfully", async () => {
+			console.log('Oppening communications with')
 			comms = await Communications.open("test")
 		})
 
-		it("should send the boot OK message", async () => {
-			const msg = await comms.waitForMessage(MessageType.BOOT_OK, 3000)
+		it("should send the BOOT_OK message", async () => {
+			const msg = await comms.waitForMessage(MessageType.BOOT_OK, 40000)
 			expect(msg.type).to.equal(MessageType.BOOT_OK)
 		})
 
@@ -154,7 +167,7 @@ export default async () => {
 				// will be enough, but some other times the network will be
 				// slow and tests will start randomly failing. Valve,
 				// ladies and gentlemen.
-				await wait(10000)
+				await wait(20000)
 
 				await Promise.all([
 					makeBotJoinTeam(true, false),
@@ -163,7 +176,7 @@ export default async () => {
 
 				// Wait another bit, so the bot can kick
 				// the players from their slot
-				await wait(10000)
+				await wait(20000)
 
 				const playersInATeam = bots[0].Lobby.members.filter(
 					(it: any) => it.team !== LobbyMemberTeam.UNASSIGNED
@@ -191,7 +204,7 @@ export default async () => {
 
 			// Wait a bit, so we know for sure that the bot has
 			// kicked the intruder
-			await wait(10000)
+			await wait(20000)
 
 			expect(bots[0].Lobby.members).to.have.length(11)
 		})

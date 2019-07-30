@@ -49,8 +49,8 @@ export default async () => {
 
 		it("should open communication and send messages", async () => {
 			comms = await Communications.open("test")
-			await comms.waitForMessage(MessageType.BOOT_OK, 3000)
-			
+			await comms.waitForMessage(MessageType.BOOT_OK, 20000)
+
 			await comms.sendMessage(MessageType.DOTA_BOT_INFO, { botId: 1 })
 			await comms.waitForMessage(MessageType.DOTA_OK)
 		})
@@ -155,7 +155,7 @@ export default async () => {
 
 		it(
 			"should prevent players from joining the wrong team, and should " +
-				"send messages in the chat",
+			"send messages in the chat",
 			async () => {
 				// Wait a bit, just in case the bots haven't finished joining
 				// the lobby. The "a bit" part is debatable. Some times 1000 ms
@@ -199,7 +199,7 @@ export default async () => {
 
 			// Wait a bit, so we know for sure that the bot has
 			// kicked the intruder
-			await wait(10000)
+			await wait(20000)
 
 			expect(bots[0].Lobby.members).to.have.length(11)
 		})
@@ -212,7 +212,7 @@ export default async () => {
 
 			// Wait a bit, so we know for sure that the bot has kept the
 			// players in place.
-			await wait(10000)
+			await wait(30000)
 
 			const playersInATeam = bots[0].Lobby.members.filter(
 				(it: any) => it.team !== LobbyMemberTeam.UNASSIGNED
@@ -263,28 +263,36 @@ export default async () => {
 		it("Kick one player", async () => {
 			const players = invitedBots()
 			const playerKicked = players[players.length - 1]
-			console.log(playerKicked)
-			console.log(bots[0].Lobby.members)
+			console.log('Will kick', playerKicked)
+			console.log('Members', bots[0].Lobby.members)
+			console.log(`The lobby has ${bots[0].Lobby.members.lenght} members`)
+
 
 			await new Promise((resolve, reject) => {
 				playerKicked.leavePracticeLobby((err: any) => {
-						if (err) {
-							reject(err)
-						} else {
-							resolve()
-						}
+					console.log(`Trying to leave practice lobby`)
+					if (err) {
+						reject(err)
+					} else {
+						console.log('Leaved successfully')
+						resolve()
 					}
-				)
+				})
 			})
 
-			await wait(10000)
+			console.log('Waiting for player get kicked')
 
-			expect(bots[0].Lobby.members).to.have.length(11)
+			// Wait a bit, so we know for sure that the bot
+			// was kicked
+
+			await wait(30000)
+			console.log(`Now the lobby has ${bots[0].Lobby.members.lenght} members`)
+			expect(bots[0].Lobby.members).to.have.length(10)
 		})
 
-		it("Invite player again", async() => {
+		it("Invite player again", async () => {
 			const newPlayerBot = bots[bots.length - 1]
-			
+
 			await new Promise((resolve, reject) => {
 				newPlayerBot.joinPracticeLobby(
 					bots[0].Lobby.lobby_id,
@@ -300,10 +308,10 @@ export default async () => {
 			})
 
 			// Wait a bit, so we know for sure that the bot has
-			// kicked the intruder
-			await wait(10000)
+			// invited back the player
+			await wait(20000)
 
-			expect(bots[0].Lobby.members).to.have.length(10)
+			expect(bots[0].Lobby.members).to.have.length(11)
 		})
 	})
 
